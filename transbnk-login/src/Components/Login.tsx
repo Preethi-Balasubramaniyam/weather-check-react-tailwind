@@ -1,12 +1,50 @@
 import Frame8 from '../assets/Frame 8.png';
 import BackgroundImage from '../assets/pexels-elīna-arāja-3334452 1.png';
 import { useNavigate } from 'react-router-dom';
+import { useState } from 'react';
 
 function Login() {
   const navigate = useNavigate();
+  const [email, setEmail] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [errors, setErrors] = useState({ email: '', phone: '' });
 
   const handleSendOTP = () => {
-    navigate('/annexure-form');
+    // Reset errors
+    setErrors({ email: '', phone: '' });
+    
+    // Validation
+    let hasErrors = false;
+    const newErrors = { email: '', phone: '' };
+    
+    if (!email.trim()) {
+      newErrors.email = 'Email is required';
+      hasErrors = true;
+    } else if (!/\S+@\S+\.\S+/.test(email)) {
+      newErrors.email = 'Please enter a valid email';
+      hasErrors = true;
+    }
+    
+    if (!phoneNumber.trim()) {
+      newErrors.phone = 'Phone number is required';
+      hasErrors = true;
+    } else if (!/^\d{10,}$/.test(phoneNumber.replace(/\D/g, ''))) {
+      newErrors.phone = 'Please enter a valid phone number';
+      hasErrors = true;
+    }
+    
+    if (hasErrors) {
+      setErrors(newErrors);
+      return;
+    }
+    
+    // Navigate to OTP verification with email and phone data
+    navigate('/otp-verification', {
+      state: {
+        email: email.trim(),
+        phoneNumber: phoneNumber.trim()
+      }
+    });
   };
   return (
     <div className="min-h-screen grid grid-cols-1 lg:grid-cols-2">
@@ -45,17 +83,23 @@ function Login() {
                 <label className="block text-sm font-medium text-slate-700">Email id<span className="text-red-500">*</span></label>
                 <input
                   type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   placeholder="Enter your email address"
-                  className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-brand focus:border-brand"
+                  className={`mt-1 w-full rounded-lg border ${errors.email ? 'border-red-500' : 'border-slate-300'} bg-white px-3 py-2 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-brand focus:border-brand`}
                 />
+                {errors.email && <p className="mt-1 text-xs text-red-500">{errors.email}</p>}
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-700">Phone number<span className="text-red-500">*</span></label>
                 <input
                   type="tel"
+                  value={phoneNumber}
+                  onChange={(e) => setPhoneNumber(e.target.value)}
                   placeholder="Enter your phone number"
-                  className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-brand focus:border-brand"
+                  className={`mt-1 w-full rounded-lg border ${errors.phone ? 'border-red-500' : 'border-slate-300'} bg-white px-3 py-2 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-brand focus:border-brand`}
                 />
+                {errors.phone && <p className="mt-1 text-xs text-red-500">{errors.phone}</p>}
               </div>
               <button
                 type="button"
